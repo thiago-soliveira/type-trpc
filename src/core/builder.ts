@@ -12,6 +12,10 @@ import { createRateLimitMiddleware } from './rateLimit';
 export interface CreateClassRouterOptions {
   t: ReturnType<typeof initTRPC.context<TRPCContext>['create']>;
   controllers: any[];
+  /** Global middlewares applied before class/method middlewares */
+  middlewares?: Middleware[];
+  /** Map of base procedures available via the {@link UseBase} decorator */
+  baseProcedures?: Record<string, any>;
 }
 
 function toCamel(str: string) {
@@ -31,7 +35,7 @@ function authMiddleware(guards: AuthGuard[]): Middleware {
 }
 
 export function createClassRouter(options: CreateClassRouterOptions) {
-  const { t, controllers } = options;
+  const { t, controllers, middlewares: globalMiddlewares = [], baseProcedures = {} } = options;
   const rootProcedures: Record<string, any> = {};
 
   for (const controller of controllers) {
@@ -46,9 +50,11 @@ export function createClassRouter(options: CreateClassRouterOptions) {
       const meta = getMethodMetadata(proto, key) as MethodMetadata | undefined;
       if (!meta) continue;
       const name = meta.name ?? key;
-      let proc = t.procedure;
+      const baseName = meta.baseProcedure ?? classMeta.baseProcedure;
+      let proc = baseName ? baseProcedures[baseName] || t.procedure : t.procedure;
 
       const combinedMiddlewares: Middleware[] = [];
+      if (globalMiddlewares) combinedMiddlewares.push(...globalMiddlewares);
       if (classMeta.middlewares) combinedMiddlewares.push(...classMeta.middlewares);
       if (meta.middlewares) combinedMiddlewares.push(...meta.middlewares);
       if (classMeta.auth) combinedMiddlewares.push(authMiddleware(classMeta.auth));
