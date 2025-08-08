@@ -6,11 +6,11 @@ import {
   getRouterMetadata,
   MethodMetadata,
 } from './metadata';
-import type { Middleware, ProcedureOptions, TRPCContext, AuthGuard } from './types';
+import type { Middleware, TRPCContext, AuthGuard } from './types';
 import { createRateLimitMiddleware } from './rateLimit';
 
 export interface CreateClassRouterOptions {
-  t: ReturnType<typeof initTRPC.context<TRPCContext>['create']>;
+  t: any;
   controllers: any[];
   /** Global middlewares applied before class/method middlewares */
   middlewares?: Middleware[];

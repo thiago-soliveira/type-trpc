@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import type { AuthGuard, Middleware, ProcedureOptions, RateLimitOptions } from './types';
+import type { AuthGuard, Middleware, RateLimitOptions } from './types';
 import { z } from 'zod';
 
 export const CLASS_METADATA = Symbol('trpc:class');
