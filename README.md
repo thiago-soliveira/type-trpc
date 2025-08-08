@@ -1,11 +1,11 @@
-# trpc-routing-controllers
+# type-trpc
 
 Decorators and class-based routing for tRPC v10.
 
 ## Installation
 
 ```bash
-npm install trpc-routing-controllers reflect-metadata
+npm install type-trpc reflect-metadata
 ```
 
 ## Quick Start
@@ -22,7 +22,7 @@ import {
   UseZod,
   UseBase,
   createClassRouter,
-} from 'trpc-routing-controllers';
+} from 'type-trpc';
 
 @Router('users')
 class UsersController {
@@ -93,3 +93,16 @@ Global middlewares can also be supplied via `createClassRouter({ middlewares: [.
 ## License
 
 [MIT](./LICENSE)
+
+## Publishing
+
+To publish a new version to npm:
+
+1. Generate an [npm automation token](https://docs.npmjs.com/creating-and-viewing-access-tokens) and add it to the repository secrets as `NPM_TOKEN`.
+2. Bump the package version locally using `npm version patch|minor|major` and update `CHANGELOG.md` if needed.
+3. Push commits and tags: `git push --follow-tags`.
+4. Create a GitHub Release with tag `vX.Y.Z` matching the version in `package.json`.
+5. The release workflow will build the project, verify the version and publish to npm with provenance. Pre-releases (e.g. `v1.0.0-rc.1`) are published under the `next` tag.
+
+The workflow requires the `id-token: write` permission to enable npm provenance during `npm publish`.
+
