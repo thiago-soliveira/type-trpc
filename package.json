@@ -1,6 +1,6 @@
 {
   "name": "type-trpc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Decorators and class-based routing for tRPC v10",
   "license": "MIT",
   "repository": {
@@ -14,7 +14,11 @@
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "files": ["dist", "README.md", "LICENSE"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
