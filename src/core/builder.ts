@@ -1,4 +1,3 @@
-import type { initTRPC } from '@trpc/server';
 import type { z } from 'zod';
 import {
   getMethodMetadata,
@@ -6,7 +5,7 @@ import {
   getRouterMetadata,
   MethodMetadata,
 } from './metadata';
-import type { Middleware, TRPCContext, AuthGuard } from './types';
+import type { Middleware, AuthGuard } from './types';
 import { createRateLimitMiddleware } from './rateLimit';
 
 export interface CreateClassRouterOptions {
