@@ -11,6 +11,7 @@ import {
   UseMiddlewares,
   UseBase,
   createClassRouter,
+  Middleware,
 } from '../src';
 
 interface CtxType {
@@ -54,7 +55,7 @@ class UsersController {
 }
 
 describe('createClassRouter', () => {
-  const globalMw = async ({ next }) => {
+  const globalMw: Middleware = async ({ next }) => {
     order.push('global');
     return next();
   };
@@ -75,7 +76,6 @@ describe('createClassRouter', () => {
 
   it('fails zod validation', async () => {
     const caller = router.createCaller({});
-    // @ts-expect-error
     await expect(caller.users.hello({ name: 1 })).rejects.toBeTruthy();
   });
 

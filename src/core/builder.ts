@@ -1,4 +1,3 @@
-import type { initTRPC } from '@trpc/server';
 import type { z } from 'zod';
 import {
   getMethodMetadata,
@@ -6,11 +5,11 @@ import {
   getRouterMetadata,
   MethodMetadata,
 } from './metadata';
-import type { Middleware, ProcedureOptions, TRPCContext, AuthGuard } from './types';
+import type { Middleware, AuthGuard } from './types';
 import { createRateLimitMiddleware } from './rateLimit';
 
 export interface CreateClassRouterOptions {
-  t: ReturnType<typeof initTRPC.context<TRPCContext>['create']>;
+  t: any;
   controllers: any[];
   /** Global middlewares applied before class/method middlewares */
   middlewares?: Middleware[];

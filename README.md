@@ -22,7 +22,7 @@ import {
   UseZod,
   UseBase,
   createClassRouter,
-} from 'trpc-routing-controllers';
+} from 'type-trpc';
 
 @Router('users')
 class UsersController {

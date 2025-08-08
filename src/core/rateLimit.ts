@@ -9,7 +9,7 @@ interface StoreItem {
 const store = new Map<string, StoreItem>();
 
 export function createRateLimitMiddleware(opts: RateLimitOptions): Middleware {
-  return async ({ ctx, path, next }) => {
+  return async ({ path, next }) => {
     const key = `${opts.key ?? 'global'}:${path}`;
     const now = Date.now();
     const item = store.get(key);

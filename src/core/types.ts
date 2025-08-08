@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type TRPCContext = unknown;
+export type TRPCContext = Record<string, unknown>;
 
 export type Middleware = (opts: {
   type: 'query' | 'mutation' | 'subscription';
