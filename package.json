@@ -1,21 +1,28 @@
 {
-  "name": "trpc-routing-controllers",
+  "name": "type-trpc",
   "version": "0.1.0",
   "description": "Decorators and class-based routing for tRPC v10",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thiago-soliveira/type-trpc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thiago-soliveira/type-trpc/issues"
+  },
+  "homepage": "https://github.com/thiago-soliveira/type-trpc#readme",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist",
-    "README.md"
-  ],
+  "files": ["dist", "README.md", "LICENSE"],
   "sideEffects": false,
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "lint": "eslint .",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run typecheck"
   },
   "exports": {
     ".": {
@@ -37,18 +44,15 @@
     "@typescript-eslint/parser": "^7.0.0",
     "eslint": "^8.0.0",
     "prettier": "^3.0.0",
+    "eslint-config-prettier": "^9.0.0",
     "tsup": "^7.0.0",
     "typescript": "^5.4.0",
     "vitest": "^1.0.0",
     "@trpc/server": "^10.0.0",
     "zod": "^3.23.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/your-org/trpc-routing-controllers.git"
-  },
-  "bugs": {
-    "url": "https://github.com/your-org/trpc-routing-controllers/issues"
-  },
-  "homepage": "https://github.com/your-org/trpc-routing-controllers#readme"
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }
