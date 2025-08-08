@@ -1,11 +1,27 @@
 # trpc-routing-controllers
 
-A tiny experiment that brings class-based routers and decorators to tRPC v10.
+Decorators and class-based routing for tRPC v10.
+
+## Installation
+
+```bash
+npm install trpc-routing-controllers reflect-metadata
+```
+
+## Quick Start
 
 ```ts
 import { z } from 'zod';
 import { initTRPC } from '@trpc/server';
-import { Router, Query, Mutation, Ctx, Input, UseZod, createClassRouter } from 'trpc-routing-controllers';
+import {
+  Router,
+  Query,
+  Mutation,
+  Ctx,
+  Input,
+  UseZod,
+  createClassRouter,
+} from 'trpc-routing-controllers';
 
 @Router('users')
 class UsersController {
@@ -17,5 +33,16 @@ class UsersController {
 }
 
 const t = initTRPC.context().create();
-const { router } = createClassRouter({ t, controllers: [new UsersController()] });
+const { router } = createClassRouter({
+  t,
+  controllers: [new UsersController()],
+});
 ```
+
+## Examples
+
+See the [tests](./tests) directory for more examples.
+
+## License
+
+[MIT](./LICENSE)

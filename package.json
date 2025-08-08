@@ -5,7 +5,10 @@
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
@@ -39,5 +42,13 @@
     "vitest": "^1.0.0",
     "@trpc/server": "^10.0.0",
     "zod": "^3.23.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/trpc-routing-controllers.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/trpc-routing-controllers/issues"
+  },
+  "homepage": "https://github.com/your-org/trpc-routing-controllers#readme"
 }
