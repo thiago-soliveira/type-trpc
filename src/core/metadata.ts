@@ -12,6 +12,8 @@ export interface RouterMetadata {
   meta?: Record<string, any>;
   auth?: AuthGuard[];
   rateLimit?: RateLimitOptions;
+  /** Name of the base procedure to use for all methods unless overridden */
+  baseProcedure?: string;
 }
 
 export interface MethodMetadata {
@@ -24,6 +26,8 @@ export interface MethodMetadata {
   deprecated?: boolean | string;
   rateLimit?: RateLimitOptions;
   auth?: AuthGuard[];
+  /** Name of the base procedure to use for this method */
+  baseProcedure?: string;
 }
 
 export interface ParamMetadata {

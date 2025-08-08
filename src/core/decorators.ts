@@ -42,6 +42,20 @@ export function UseMiddlewares(...middlewares: Middleware[]) {
   };
 }
 
+export function UseBase(name: string) {
+  return function (target: any, propertyKey?: string | symbol) {
+    if (propertyKey) {
+      const meta = getMethodMetadata(target, propertyKey) || { type: 'query' };
+      meta.baseProcedure = name;
+      setMethodMetadata(target, propertyKey, meta);
+    } else {
+      const meta = getRouterMetadata(target);
+      meta.baseProcedure = name;
+      setRouterMetadata(target, meta);
+    }
+  };
+}
+
 function procedureDecorator(type: 'query' | 'mutation' | 'subscription') {
   return function (name?: string, opts?: ProcedureOptions) {
     return function (target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
