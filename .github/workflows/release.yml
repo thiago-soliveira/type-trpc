@@ -43,6 +43,10 @@ jobs:
 
       - name: Check dist exists
         run: test -d dist
+      
+      - name: Configure npm for type-trpc package
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
 
       - name: Publish to npm (prerelease)
         if: ${{ github.event.release.prerelease }}
