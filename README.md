@@ -1,8 +1,10 @@
 # type-trpc
 
-Decorators and class-based routing for tRPC v10.
+Decorators and class-based routing for tRPC v11.
 
 ## Installation
+
+Requires Node.js >=18.
 
 ```bash
 npm install type-trpc reflect-metadata
@@ -12,7 +14,8 @@ npm install type-trpc reflect-metadata
 
 ```ts
 import { z } from 'zod';
-import { initTRPC } from '@trpc/server';
+import { initTRPC, TRPCError } from '@trpc/server';
+import superjson from 'superjson';
 import {
   Router,
   Query,
@@ -40,7 +43,7 @@ class UsersController {
   }
 }
 
-const t = initTRPC.context().create();
+const t = initTRPC.context().create({ transformer: superjson });
 const { router } = createClassRouter({
   t,
   controllers: [new UsersController()],
@@ -48,7 +51,7 @@ const { router } = createClassRouter({
   baseProcedures: {
     public: t.procedure,
     protected: t.procedure.use(({ ctx, next }) => {
-      if (!ctx.user) throw new Error('UNAUTHORIZED');
+      if (!ctx.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
       return next();
     }),
   },
@@ -57,7 +60,19 @@ const { router } = createClassRouter({
 
 ## Examples
 
-See the [tests](./tests) directory for more examples.
+See the [tests](./tests) directory for more examples and the [examples](./examples) folder for Express and Fastify adapters.
+
+## Feature parity
+
+| tRPC v11 feature | Decorator equivalent |
+| ---------------- | -------------------- |
+| Router & procedure builders | `@Router`, `@Query`, `@Mutation`, `@Subscription` |
+| Middlewares | `@UseMiddlewares` |
+| Input/output validation | `@UseZod` |
+| Metadata | `@Meta` |
+| Auth guards | `@Auth` |
+| Rate limiting | `@RateLimit` |
+| Deprecation flags | `@Deprecated` |
 
 ### Base procedures
 
