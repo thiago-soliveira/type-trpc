@@ -44,7 +44,7 @@ class UsersController {
 }
 
 const t = initTRPC.context().create({ transformer: superjson });
-const { router } = createClassRouter({
+const { router: appRouter } = createClassRouter({
   t,
   controllers: [new UsersController()],
   // register base procedures
@@ -56,6 +56,8 @@ const { router } = createClassRouter({
     }),
   },
 });
+
+export type AppRouter = typeof appRouter;
 ```
 
 ## Examples
