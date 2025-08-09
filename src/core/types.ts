@@ -7,10 +7,12 @@ export type Middleware = (opts: {
   path: string;
   ctx: TRPCContext;
   input: unknown;
-  next: () => Promise<unknown>;
+  next: (opts?: { ctx?: TRPCContext; input?: unknown }) => Promise<unknown>;
 }) => Promise<unknown>;
 
-export type AuthGuard = (ctx: TRPCContext) => boolean | Promise<boolean>;
+export type AuthGuard = (
+  ctx: TRPCContext
+) => boolean | 'UNAUTHORIZED' | 'FORBIDDEN' | Promise<boolean | 'UNAUTHORIZED' | 'FORBIDDEN'>;
 
 export interface RateLimitOptions {
   key?: string;
@@ -27,3 +29,21 @@ export interface ProcedureOptions {
   rateLimit?: RateLimitOptions;
   auth?: AuthGuard | AuthGuard[];
 }
+
+export type AppRouter = ReturnType<typeof import('./builder').createClassRouter>['router'];
+
+export type InferInput<TClass, TMethod extends keyof TClass> = TClass[TMethod] extends (
+  ...args: infer P
+) => any
+  ? P extends [any, infer I]
+    ? I
+    : P[0]
+  : never;
+
+export type InferOutput<TClass, TMethod extends keyof TClass> = TClass[TMethod] extends (
+  ...args: any
+) => Promise<infer R>
+  ? R
+  : TClass[TMethod] extends (...args: any) => infer R
+  ? R
+  : never;

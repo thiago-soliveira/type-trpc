@@ -1,5 +1,6 @@
 import type { Middleware } from './types';
 import type { RateLimitOptions } from './types';
+import { TRPCError } from '@trpc/server';
 
 interface StoreItem {
   points: number;
@@ -15,7 +16,7 @@ export function createRateLimitMiddleware(opts: RateLimitOptions): Middleware {
     const item = store.get(key);
     if (item && item.expires > now) {
       if (item.points >= opts.points) {
-        throw new Error('Rate limit exceeded');
+        throw new TRPCError({ code: 'TOO_MANY_REQUESTS' });
       }
       item.points++;
     } else {

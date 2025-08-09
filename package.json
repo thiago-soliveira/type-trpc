@@ -1,7 +1,7 @@
 {
   "name": "type-trpc",
-  "version": "0.1.3",
-  "description": "Decorators and class-based routing for tRPC v10",
+  "version": "0.2.0",
+  "description": "Decorators and class-based routing for tRPC v11",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -25,6 +25,7 @@
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:ci": "vitest run --maxWorkers 1 --minWorkers 1",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm run typecheck"
   },
@@ -36,8 +37,9 @@
     }
   },
   "peerDependencies": {
-    "@trpc/server": "^10.0.0",
-    "zod": "^3.23.0"
+    "@trpc/server": "^11.0.0",
+    "zod": "^3.23.8",
+    "superjson": "^2.0.0"
   },
   "dependencies": {
     "reflect-metadata": "^0.1.13"
@@ -50,10 +52,13 @@
     "prettier": "^3.0.0",
     "eslint-config-prettier": "^9.0.0",
     "tsup": "^7.0.0",
-    "typescript": "^5.4.0",
+    "typescript": "^5.9.2",
     "vitest": "^1.0.0",
-    "@trpc/server": "^10.0.0",
-    "zod": "^3.23.0"
+    "@trpc/server": "^11.0.0",
+    "zod": "^3.23.8"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "publishConfig": {
     "access": "public",

@@ -7,6 +7,7 @@ import {
 } from './metadata';
 import type { Middleware, AuthGuard } from './types';
 import { createRateLimitMiddleware } from './rateLimit';
+import { TRPCError } from '@trpc/server';
 
 export interface CreateClassRouterOptions {
   t: any;
@@ -25,8 +26,9 @@ function authMiddleware(guards: AuthGuard[]): Middleware {
   return async ({ ctx, next }) => {
     for (const g of guards) {
       const ok = await g(ctx);
-      if (!ok) {
-        throw new Error('UNAUTHORIZED');
+      if (ok !== true) {
+        const code = ok === 'FORBIDDEN' ? 'FORBIDDEN' : 'UNAUTHORIZED';
+        throw new TRPCError({ code });
       }
     }
     return next();
