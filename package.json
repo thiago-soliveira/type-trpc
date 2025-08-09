@@ -1,6 +1,6 @@
 {
   "name": "type-trpc",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Decorators and class-based routing for tRPC v11",
   "license": "MIT",
   "repository": {
