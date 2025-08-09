@@ -1,5 +1,5 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
-import { initTRPC, TRPCError } from '@trpc/server';
+import { initTRPC, TRPCError, type AnyRouter, inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { observable } from '@trpc/server/observable';
 import superjson from 'superjson';
 import { z } from 'zod';
@@ -114,7 +114,7 @@ describe('createClassRouter', () => {
   });
 
   it('validates input and output', async () => {
-    const caller = router.createCaller({});
+    const caller = (router as any).createCaller({});
     const res = await caller.users.hello({ name: 'Alice' });
     expect(res).toBe('hello Alice');
     await expect(caller.users.hello({ name: 1 as any })).rejects.toBeTruthy();
@@ -122,29 +122,29 @@ describe('createClassRouter', () => {
   });
 
   it('orders middlewares correctly', async () => {
-    const caller = router.createCaller({});
+    const caller = (router as any).createCaller({});
     order.length = 0;
     await caller.users.hello({ name: 'Bob' });
     expect(order).toEqual(['global', 'class', 'method']);
   });
 
   it('runs guards', async () => {
-    const callerNoUser = router.createCaller({});
+    const callerNoUser = (router as any).createCaller({});
     await expect(callerNoUser.users.admin()).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
-    const callerUser = router.createCaller({ user: { id: '1', role: 'user' } });
+    const callerUser = (router as any).createCaller({ user: { id: '1', role: 'user' } });
     await expect(callerUser.users.admin()).rejects.toMatchObject({ code: 'FORBIDDEN' });
-    const callerAdmin = router.createCaller({ user: { id: '2', role: 'admin' } });
+    const callerAdmin = (router as any).createCaller({ user: { id: '2', role: 'admin' } });
     await expect(callerAdmin.users.admin()).resolves.toBe('2');
   });
 
   it('enforces rate limiting', async () => {
-    const caller = router.createCaller({});
+    const caller = (router as any).createCaller({});
     await expect(caller.users.limited()).resolves.toBe('ok');
     await expect(caller.users.limited()).rejects.toMatchObject({ code: 'TOO_MANY_REQUESTS' });
   });
 
   it('handles subscriptions', async () => {
-    const caller = router.createCaller({});
+    const caller = (router as any).createCaller({});
     const obs = await caller.users.count();
     const values: number[] = [];
     await new Promise<void>((resolve, reject) => {
@@ -162,14 +162,24 @@ describe('createClassRouter', () => {
   it('exposes transformer and errorFormatter', () => {
     expect(router._def._config.transformer).not.toBeUndefined();
     const formatted = router._def._config.errorFormatter({
-      shape: { message: '', code: 'INTERNAL_SERVER_ERROR', data: {} } as any,
+      shape: { message: '', code: 'INTERNAL_SERVER_ERROR', data: {} },
       error: new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'oops' }),
-    });
+    } as any);
     expect((formatted as any).message).toBe('oops');
   });
 
   it('infers types', () => {
     expectTypeOf<InferInput<UsersController, 'hello'>>().toEqualTypeOf<{ name: string }>();
     expectTypeOf<InferOutput<UsersController, 'add'>>().toEqualTypeOf<{ id: string; user?: string | undefined }>();
+  });
+
+  it('returns a typed router', () => {
+    expectTypeOf(router).toMatchTypeOf<AnyRouter>();
+    expectTypeOf(router).not.toBeAny();
+    type AppRouter = typeof router;
+    type Inputs = inferRouterInputs<AppRouter>;
+    type Outputs = inferRouterOutputs<AppRouter>;
+    expectTypeOf<Inputs>().toBeObject();
+    expectTypeOf<Outputs>().toBeObject();
   });
 });
