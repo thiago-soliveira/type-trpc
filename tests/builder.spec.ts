@@ -1,5 +1,5 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
-import { initTRPC, TRPCError } from '@trpc/server';
+import { initTRPC, TRPCError, type AnyRouter, inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { observable } from '@trpc/server/observable';
 import superjson from 'superjson';
 import { z } from 'zod';
@@ -115,36 +115,46 @@ describe('createClassRouter', () => {
 
   it('validates input and output', async () => {
     const caller = router.createCaller({});
+    // @ts-expect-error dynamic router keys are not typed
     const res = await caller.users.hello({ name: 'Alice' });
     expect(res).toBe('hello Alice');
+    // @ts-expect-error dynamic router keys are not typed
     await expect(caller.users.hello({ name: 1 as any })).rejects.toBeTruthy();
+    // @ts-expect-error dynamic router keys are not typed
     await expect(caller.users.bad()).rejects.toBeTruthy();
   });
 
   it('orders middlewares correctly', async () => {
     const caller = router.createCaller({});
     order.length = 0;
+    // @ts-expect-error dynamic router keys are not typed
     await caller.users.hello({ name: 'Bob' });
     expect(order).toEqual(['global', 'class', 'method']);
   });
 
   it('runs guards', async () => {
     const callerNoUser = router.createCaller({});
+    // @ts-expect-error dynamic router keys are not typed
     await expect(callerNoUser.users.admin()).rejects.toMatchObject({ code: 'UNAUTHORIZED' });
     const callerUser = router.createCaller({ user: { id: '1', role: 'user' } });
+    // @ts-expect-error dynamic router keys are not typed
     await expect(callerUser.users.admin()).rejects.toMatchObject({ code: 'FORBIDDEN' });
     const callerAdmin = router.createCaller({ user: { id: '2', role: 'admin' } });
+    // @ts-expect-error dynamic router keys are not typed
     await expect(callerAdmin.users.admin()).resolves.toBe('2');
   });
 
   it('enforces rate limiting', async () => {
     const caller = router.createCaller({});
+    // @ts-expect-error dynamic router keys are not typed
     await expect(caller.users.limited()).resolves.toBe('ok');
+    // @ts-expect-error dynamic router keys are not typed
     await expect(caller.users.limited()).rejects.toMatchObject({ code: 'TOO_MANY_REQUESTS' });
   });
 
   it('handles subscriptions', async () => {
     const caller = router.createCaller({});
+    // @ts-expect-error dynamic router keys are not typed
     const obs = await caller.users.count();
     const values: number[] = [];
     await new Promise<void>((resolve, reject) => {
@@ -164,6 +174,10 @@ describe('createClassRouter', () => {
     const formatted = router._def._config.errorFormatter({
       shape: { message: '', code: 'INTERNAL_SERVER_ERROR', data: {} } as any,
       error: new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'oops' }),
+      type: 'query',
+      path: undefined,
+      input: undefined,
+      ctx: undefined,
     });
     expect((formatted as any).message).toBe('oops');
   });
@@ -171,5 +185,15 @@ describe('createClassRouter', () => {
   it('infers types', () => {
     expectTypeOf<InferInput<UsersController, 'hello'>>().toEqualTypeOf<{ name: string }>();
     expectTypeOf<InferOutput<UsersController, 'add'>>().toEqualTypeOf<{ id: string; user?: string | undefined }>();
+  });
+
+  it('returns a typed router', () => {
+    expectTypeOf(router).toMatchTypeOf<AnyRouter>();
+    expectTypeOf(router).not.toBeAny();
+    type AppRouter = typeof router;
+    type Inputs = inferRouterInputs<AppRouter>;
+    type Outputs = inferRouterOutputs<AppRouter>;
+    expectTypeOf<Inputs>().toBeObject();
+    expectTypeOf<Outputs>().toBeObject();
   });
 });

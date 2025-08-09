@@ -9,14 +9,31 @@ import type { Middleware, AuthGuard } from './types';
 import { createRateLimitMiddleware } from './rateLimit';
 import { TRPCError } from '@trpc/server';
 
-export interface CreateClassRouterOptions {
-  t: any;
+import type {
+  AnyRouter,
+  AnyTRPCRootTypes as AnyRootTypes,
+  TRPCBuiltRouter as BuiltRouter,
+  TRPCRouterRecord as RouterRecord,
+  TRPCRouterBuilder as RouterBuilder,
+  TRPCProcedureBuilder as ProcedureBuilder,
+} from '@trpc/server';
+
+export interface CreateClassRouterOptions<TRoot extends AnyRootTypes> {
+  t: {
+    router: RouterBuilder<TRoot>;
+    mergeRouters: (...routers: AnyRouter[]) => AnyRouter;
+    procedure: ProcedureBuilder<any, any, any, any, any, any, any, any>;
+  };
   controllers: any[];
   /** Global middlewares applied before class/method middlewares */
   middlewares?: Middleware[];
   /** Map of base procedures available via the {@link UseBase} decorator */
   baseProcedures?: Record<string, any>;
 }
+
+export type ClassRouter<TRoot extends AnyRootTypes> = {
+  router: BuiltRouter<TRoot, RouterRecord>;
+};
 
 function toCamel(str: string) {
   return str.charAt(0).toLowerCase() + str.slice(1);
@@ -35,16 +52,18 @@ function authMiddleware(guards: AuthGuard[]): Middleware {
   };
 }
 
-export function createClassRouter(options: CreateClassRouterOptions) {
+export function createClassRouter<TRoot extends AnyRootTypes>(
+  options: CreateClassRouterOptions<TRoot>,
+): ClassRouter<TRoot> {
   const { t, controllers, middlewares: globalMiddlewares = [], baseProcedures = {} } = options;
-  const rootProcedures: Record<string, any> = {};
+  const rootProcedures: Record<string, AnyRouter> = {};
 
   for (const controller of controllers) {
     const ctor = controller.constructor;
     const classMeta = getRouterMetadata(ctor);
     const base = classMeta.base ?? toCamel(ctor.name);
 
-    const procedures: Record<string, any> = {};
+    const procedures: RouterRecord = {};
     const proto = Object.getPrototypeOf(controller);
     for (const key of Object.getOwnPropertyNames(proto)) {
       if (key === 'constructor') continue;
@@ -72,7 +91,7 @@ export function createClassRouter(options: CreateClassRouterOptions) {
       if (meta.output) proc = proc.output(meta.output as z.ZodTypeAny);
 
       const paramMeta = getParamMetadata(proto, key);
-      const handler = async (opts: { ctx: any; input: any }) => {
+      const handler = (opts: { ctx: any; input: any }) => {
         const args: any[] = [];
         for (const p of paramMeta) {
           args[p.index] = p.type === 'ctx' ? opts.ctx : opts.input;
@@ -83,7 +102,7 @@ export function createClassRouter(options: CreateClassRouterOptions) {
       if (meta.type === 'mutation') {
         procedures[name] = proc.mutation(handler);
       } else if (meta.type === 'subscription') {
-        procedures[name] = proc.subscription(handler as any);
+        procedures[name] = proc.subscription(handler);
       } else {
         procedures[name] = proc.query(handler);
       }
@@ -92,7 +111,10 @@ export function createClassRouter(options: CreateClassRouterOptions) {
     if (!rootProcedures[base]) {
       rootProcedures[base] = t.router(procedures);
     } else {
-      rootProcedures[base] = t.mergeRouters(rootProcedures[base], t.router(procedures));
+      rootProcedures[base] = t.mergeRouters(
+        rootProcedures[base]!,
+        t.router(procedures),
+      );
     }
   }
 
