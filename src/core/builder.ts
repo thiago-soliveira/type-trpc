@@ -9,14 +9,22 @@ import type { Middleware, AuthGuard } from './types';
 import { createRateLimitMiddleware } from './rateLimit';
 import { TRPCError } from '@trpc/server';
 
-export interface CreateClassRouterOptions {
-  t: any;
+import type { AnyRouter } from '@trpc/server';
+
+export interface CreateClassRouterOptions<T extends {
+  router: (...args: any[]) => AnyRouter;
+  mergeRouters: (...args: AnyRouter[]) => AnyRouter;
+  procedure: any;
+}> {
+  t: T;
   controllers: any[];
   /** Global middlewares applied before class/method middlewares */
   middlewares?: Middleware[];
   /** Map of base procedures available via the {@link UseBase} decorator */
   baseProcedures?: Record<string, any>;
 }
+
+export type ClassRouter<TRouter extends AnyRouter> = { router: TRouter };
 
 function toCamel(str: string) {
   return str.charAt(0).toLowerCase() + str.slice(1);
@@ -35,7 +43,14 @@ function authMiddleware(guards: AuthGuard[]): Middleware {
   };
 }
 
-export function createClassRouter(options: CreateClassRouterOptions) {
+export function createClassRouter<
+  T extends {
+    router: (...args: any[]) => AnyRouter;
+    mergeRouters: (...args: AnyRouter[]) => AnyRouter;
+    procedure: any;
+  },
+  TRouter extends AnyRouter = ReturnType<T['router']>,
+>(options: CreateClassRouterOptions<T>): ClassRouter<TRouter> {
   const { t, controllers, middlewares: globalMiddlewares = [], baseProcedures = {} } = options;
   const rootProcedures: Record<string, any> = {};
 
@@ -96,6 +111,6 @@ export function createClassRouter(options: CreateClassRouterOptions) {
     }
   }
 
-  const router = t.router(rootProcedures);
+  const router = t.router(rootProcedures) as TRouter;
   return { router };
 }
