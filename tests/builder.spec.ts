@@ -1,5 +1,5 @@
 import { describe, it, expect, expectTypeOf } from 'vitest';
-import { initTRPC, TRPCError } from '@trpc/server';
+import { initTRPC, TRPCError, type AnyRouter, inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { observable } from '@trpc/server/observable';
 import superjson from 'superjson';
 import { z } from 'zod';
@@ -171,5 +171,15 @@ describe('createClassRouter', () => {
   it('infers types', () => {
     expectTypeOf<InferInput<UsersController, 'hello'>>().toEqualTypeOf<{ name: string }>();
     expectTypeOf<InferOutput<UsersController, 'add'>>().toEqualTypeOf<{ id: string; user?: string | undefined }>();
+  });
+
+  it('returns a typed router', () => {
+    expectTypeOf(router).toMatchTypeOf<AnyRouter>();
+    expectTypeOf(router).not.toBeAny();
+    type AppRouter = typeof router;
+    type Inputs = inferRouterInputs<AppRouter>;
+    type Outputs = inferRouterOutputs<AppRouter>;
+    expectTypeOf<Inputs>().toBeObject();
+    expectTypeOf<Outputs>().toBeObject();
   });
 });
